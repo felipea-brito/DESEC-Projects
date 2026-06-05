@@ -8,23 +8,23 @@ BOLD='\033[1m'
 NC='\033[0m'
 
 REDE="${1:-172.16.1.0/24}"
-KNOCK_PORTS=(13 37 30000 3000 1337)   # sequência exata do pcap
-BACKDOOR_PORT=1337                     # porta HTTP aberta após knock
-KNOCK_TIMEOUT=1                        # segundos por knock
-CURL_TIMEOUT=5                         # timeout do curl
+KNOCK_PORTS=(13 37 30000 3000 1337)
+BACKDOOR_PORT=1337
+KNOCK_TIMEOUT=1
+CURL_TIMEOUT=5
 INFECTADOS=()
 
 echo -e "${BOLD}"
 echo -e "${NC}"
 
 if [[ $EUID -ne 0 ]]; then
-    echo -e "${RED}[ERRO]${NC} Execute com sudo: sudo bash $0"
+    echo -e "${RED}[ERRO]${NC} Execute as a sudo: sudo bash $0"
     exit 1
 fi
 
 for dep in hping3 curl; do
     if ! command -v $dep &>/dev/null; then
-        echo -e "${RED}[ERRO]${NC} '$dep' não encontrado. Instale com: apt install $dep"
+        echo -e "${RED}[ERRO]${NC} '$dep' can't find it. Install: apt install $dep"
         exit 1
     fi
 done
@@ -34,11 +34,9 @@ calcular_ips() {
     local base_ip="${rede%/*}"
     local prefixo="${rede#*/}"
 
-    # Converter IP base para inteiro
     IFS='.' read -r a b c d <<< "$base_ip"
     local ip_int=$(( (a << 24) | (b << 16) | (c << 8) | d ))
 
-    # Máscara
     local mask=$(( 0xFFFFFFFF << (32 - prefixo) & 0xFFFFFFFF ))
     local total=$(( (1 << (32 - prefixo)) - 2 ))  # -2 (rede e broadcast)
     local inicio=$(( (ip_int & mask) + 1 ))
@@ -56,23 +54,19 @@ calcular_ips() {
 testar_host() {
     local ip="$1"
 
-    # Verificar se host está ativo (ping rápido)
     if ! ping -c 1 -W 1 "$ip" &>/dev/null; then
         return
     fi
 
     echo -e "${CYAN}[*]${NC} Host ativo: ${BOLD}$ip${NC} — enviando knock sequence..."
 
-    # Enviar sequência de knock
     for porta in "${KNOCK_PORTS[@]}"; do
         hping3 -S -p "$porta" -c 1 "$ip" &>/dev/null
         sleep 0.2
     done
 
-    # Aguardar o servidor processar os knocks
     sleep 0.5
 
-    # Verificar se a porta 1337 abriu e retorna conteúdo do malware
     resposta=$(curl -s -m "$CURL_TIMEOUT" "http://$ip:${BACKDOOR_PORT}/" 2>/dev/null)
 
     if echo "$resposta" | grep -qi "ricardocry\|infected\|malware\|chave"; then
@@ -80,7 +74,6 @@ testar_host() {
         echo -e "      Resposta: $(echo "$resposta" | grep -i "ricardocry\|infected\|chave" | head -3)"
         INFECTADOS+=("$ip")
 
-        # Salvar resultado
         echo "========================================" >> infectados.txt
         echo "HOST: $ip" >> infectados.txt
         echo "DATA: $(date)" >> infectados.txt
