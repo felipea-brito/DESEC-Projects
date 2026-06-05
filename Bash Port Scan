@@ -2,8 +2,7 @@
 
 if [ "$1" == "" ]
 then
-    echo "DESEC SECURITY - PORTSCAN NETWORK"
-    echo "Modo de uso: $0 REDE PORTA"
+    echo "How to use: $0 Network Port"
 else
 for ip in {1..254};
 do
