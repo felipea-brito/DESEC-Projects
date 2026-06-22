@@ -2,7 +2,6 @@
 
 import socket
 
-
 def scan_port(ip, port, timeout=1):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.settimeout(timeout)
