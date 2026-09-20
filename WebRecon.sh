@@ -17,15 +17,13 @@ read -p "Type one for direcotry research and two for a file [1] [2]: " option
     
   elif [[ $option == 2 ]]; then
 
-    read -p "Type the extension: " extension
-    
-    for word in $(cat word.txt);
+    for extension in $(cat "/usr/share/wordlists/seclists/Discovery/Web-Content/raft-small-files.txt");
     
     do
-      response=$(curl -s -H "User-Agent: DesecTool" -o /dev/null -w "%{http_code}" "$domain/$word.$extension")
+      response=$(curl -s -H "User-Agent: DesecTool" -o /dev/null -w "%{http_code}" "$domain/$directory.$extension")
     
       if [[ $response == "200" ]]; then
-        echo "File discovered: $word.$extension"
+        echo "File discovered: $directory.$extension"
       fi
     done
 
