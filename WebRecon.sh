@@ -5,7 +5,7 @@ read -p "Type one for direcotry research and two for a file [1] [2]: " option
 
   if [[ $option == 1 ]]; then
     
-    for directory in $(cat directory.txt);
+    for directory in $(cat "/usr/share/wordlists/seclists/Discovery/Web-Content/raft-large-directories.txt");
     
     do
       response=$(curl -s -H "User-Agent: DesecTool" -o /dev/null -w "%{http_code}" "$domain/$direcotry/")
