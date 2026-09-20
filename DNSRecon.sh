@@ -6,7 +6,7 @@ if [[ $verify == 2 ]]; then
 
   read -p "Type the domain to verify: " domain
   
-  for word in $(cat n0kovo_subdomains.txt);
+  for word in $(cat '/usr/share/wordlists/seclists/Discovery/DNS/n0kovo_subdomains.txt');
   do
     host $word.$domain | grep -v "NXDOMAIN"
   done
